@@ -20,7 +20,13 @@ The source of the data is a
 [PDF](https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf) that
 contains Freud’s complete work and that was downloaded from the
 following website: <https://www.valas.fr/?lang=fr>. To reproduce the
-data preparation simply run the following command:
+data preparation clone locally the repository:
+
+`git clone git@github.com:gygl/tidyfreud.git`
+
+and open the folder as an RStudio project. Then download the file
+`Freud_Complete_Works.pdf` and move it to `./data`. You can then run the
+whole preprocessing steps by running the following command:
 
 ``` r
 targets::tar_make()
@@ -34,7 +40,7 @@ create_sfreud_complete_work_tibble(path_pdf = "./data/Freud_Complete_Works.pdf")
 
 that takes as argument `path_pdf` the path of the pdf file.
 
-The processing steps are:
+The main processing steps are:
 
 - import in R of the text contained in the PDF
 - splitting of the text in lines/words
