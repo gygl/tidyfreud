@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+data/Freud_Complete_Works.pdf
+dev-task.R

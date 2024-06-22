@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+R/create-sigmund-freud-complete-work-tibble.R
+R/utils.R
+^README\.Rmd$

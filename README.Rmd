@@ -1,0 +1,48 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# tidyfreud <img src="man/figures/logo.png" align="right" height="139" alt="" />
+
+tidyfreud contains the complete work of Sigmund Freud in a tidy format, e.g. ready for NLP tasks.
+
+## Installation
+
+You can install the development version of tidyfreud from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("gygl/tidyfreud")
+```
+
+## Reproduction of text preparation
+
+The source of the data is a [PDF](https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf) that contains Freud's complete work and that was downloaded from the following website: https://www.valas.fr/?lang=fr.
+To reproduce the data preparation simply run the following command:
+
+```{r run pipeline, eval = FALSE}
+targets::tar_make()
+```
+
+All the pre-processing steps are done via the function:
+
+```{r preprocessing function, eval = FALSE}
+create_sfreud_complete_work_tibble(path_pdf = "./data/Freud_Complete_Works.pdf")
+```
+
+that takes as argument `path_pdf` the path of the pdf file.
+
+The processing steps are:
+
+* import in R of the text contained in the PDF 
+* splitting of the text in lines/words
+* detection of the book/article titles
