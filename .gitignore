@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.Rproj
+_targets/
 data/Freud_Complete_Works.pdf
 dev-task.R
 display_page.txt

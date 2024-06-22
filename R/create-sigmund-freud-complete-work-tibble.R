@@ -170,7 +170,7 @@ create_sfreud_complete_work_tibble = function(path_pdf) {
   text_by_line = text_by_line %>%
     mutate(signature = ifelse(is_signature, text, NA_character_),
            # reformat signture
-           signature = tolower(str_remove(signature, "^\\(|\\)$")),
+           signature = tolower(str_remove(str_remove(signature, "^\\("), "\\)$")),
            # make both signature and subtitle factors to make it lighter
            signature = factor(signature, levels = sort(unique(.data$signature))),
            subtitle = factor(subtitle, levels = sort(unique(text_by_line$subtitle)))) %>%
