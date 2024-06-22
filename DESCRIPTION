@@ -1,7 +1,7 @@
 Package: tidyfreud
 Type: Package
-Title: Dataset with Sigmund Freud's complete work
-Version: 0.1.0
+Title: Dataset with Sigmund Freud's complete work in tidy format
+Version: 0.2.0
 Author: Lucien Gyger <lucien.gyger@gmail.com>
 Maintainer: Lucien Gyger <lucien.gyger@gmail.com>
 Description: Data package that contains the complete work of Sigmund Freud in 

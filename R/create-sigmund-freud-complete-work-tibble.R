@@ -124,14 +124,69 @@ create_sfreud_complete_work_tibble = function(path_pdf) {
     mutate(publi_yr = as.integer(publi_yr),
            writ_yr = as.integer(writ_yr)) %>%
     select(-date) %>%
+    rename("pg_all" = "page") %>%
+    mutate(is_subtitle = is_title & is.na(title)) %>%
     # fill downward title name, and dates
     tidyr::fill(title, publi_yr, writ_yr) %>%
     # filter out line that only contains page number
-    filter(!is_page_nb) %>% select(-is_page_nb)%>%
-    rename("pg_all" = "page") %>%
+    filter(!is_page_nb) %>% select(-is_page_nb) %>%
+    mutate(line_all = as.integer(1:n())) %>%
+    # create page index at the title (book or article level)
     group_by(title) %>% mutate(pg_title = pg_all - min(pg_all) + 1) %>%
+    group_by(title, pg_title) %>% mutate(line_pg = as.integer(1:n())) %>%
     ungroup() %>%
-    select(pg_all, publi_yr, writ_yr, title, pg_title, text)
+    relocate(pg_all, line_all, text)
+
+  # find what is a subtitle or not by manual inspection
+  tmp_title_not_found = text_by_line[text_by_line$is_subtitle, ]
+
+  # ist not a title
+  index_line_all_not_a_subtitle =
+    c(28, 41, 53, 58, 62, 412, 416, 4395, 4399, 6033, 6037, 33535, 41936:41938,
+      42012, 42016, 42020, 42021, 42221, 42223, 43130, 51254, 51273, 51254,
+      51273, 51632, 56404, 56405, 56409, 93887, 93895, 93896, 93906, 104275,
+      104343, 114566)
+  # is a signature
+  signature = c(28, 41, 53, 58, 62, 412, 416, 4395, 4399, 6033, 6037, 51254,
+                51273, 93895, 93906, 104275, 104343, 114566)
+  # line to just remove
+  index_line_to_remove = c(104085)
+
+  text_by_line$is_subtitle[text_by_line$line_all %in% index_line_all_not_a_subtitle] = FALSE
+  text_by_line$is_signature = FALSE
+  text_by_line$is_signature[text_by_line$line_all %in% signature] = TRUE
+  text_by_line = text_by_line %>% filter(line_all != index_line_to_remove)
+  text_by_line = text_by_line[-index_line_to_remove,]
+
+  # concatenation of consecutive subtitles
+  indices_concat = concatenate_consecutive_subtitles(text_by_line$is_subtitle, text_by_line$text)
+  text_by_line$subtitle = NA_character_
+  text_by_line$subtitle[text_by_line$is_subtitle] = text_by_line$text[text_by_line$is_subtitle]
+  text_by_line$subtitle[indices_concat$starting_indice] =
+    indices_concat$consecutive_sequences
+  text_by_line = text_by_line[-indices_concat$consecutive_indices_excluding_start, ]
+
+  # final preparation text by line
+  text_by_line = text_by_line %>%
+    mutate(signature = ifelse(is_signature, text, NA_character_),
+           # reformat signture
+           signature = tolower(str_remove(signature, "^\\(|\\)$")),
+           # make both signature and subtitle factors to make it lighter
+           signature = factor(signature, levels = sort(unique(.data$signature))),
+           subtitle = factor(subtitle, levels = sort(unique(text_by_line$subtitle)))) %>%
+    group_by(title) %>%
+    # fill rows with subtitle and signature
+    fill(subtitle) %>% fill(signature, .direction = "up") %>%
+    ungroup() %>%
+    select(pg_all, line_all, publi_yr, writ_yr, title, pg_title,line_pg, subtitle, text, signature)
+
+  # by word
+  text_by_word = text_by_line %>%
+    # tokenize to words
+    unnest_tokens(word, text) %>%
+    anti_join(stop_words) %>%
+    # remove digits only
+    filter(str_detect(word, "^\\d+$", negate=TRUE))
 
   # setdiff(text_by_line$title %>% unique, titles_tbl$titles)
   # setdiff(titles_tbl$titles, text_by_line$title %>% unique)
@@ -139,6 +194,7 @@ create_sfreud_complete_work_tibble = function(path_pdf) {
   return(list(
     by_page = text_by_page
     , by_line = text_by_line
+    , by_word = text_by_word
     ))
 
 }
@@ -196,5 +252,79 @@ use_data = function(freud_page, freud_line, freud_word) {
   usethis::use_data(freud_line)
   usethis::use_data(freud_word)
 
+
+}
+
+#' Take av vector of logical, detect when 2 consecutive TRUE, and concatenate the
+#' character at the corresponding position.
+#'
+#' @param is_subtitle logical
+#' @param text character
+#'
+#' @return list, with concat character, starting indices, ending indice and list with what was concatenated for check purpose
+#' @export
+#'
+concatenate_consecutive_subtitles = function(is_subtitle, text) {
+
+  # Sample logical vector
+  logical_vector <- is_subtitle
+
+  # Corresponding text vector
+  text_vector <- text
+
+  # Identify positions of TRUE values
+  positions <- which(logical_vector)
+
+  # Pre-allocate lists based on the maximum possible number of sequences
+  max_sequences <- floor(length(positions) / 2)
+
+  consecutive_sequences <- vector("list", max_sequences)
+  starting_indices <- vector("list", max_sequences)
+  consecutive_indices_excluding_start <- vector("list", max_sequences)
+  concatenated_elements <- vector("list", max_sequences)
+
+  # Initialize variables to keep track of current sequence and index for storing results
+  current_sequence <- c()
+  result_index <- 1
+
+  for (i in seq_along(positions)) {
+    if (i > 1 && positions[i] == positions[i - 1] + 1) {
+      # If current position is consecutive to the previous one, add to the sequence
+      current_sequence <- c(current_sequence, positions[i])
+    } else {
+      # If not, check the length of the current sequence
+      if (length(current_sequence) == 2) {
+        consecutive_sequences[[result_index]] <- paste(text_vector[current_sequence], collapse = " ")
+        starting_indices[[result_index]] <- current_sequence[1]
+        consecutive_indices_excluding_start[[result_index]] <- current_sequence[-1]
+        concatenated_elements[[result_index]] <- text_vector[current_sequence]
+        result_index <- result_index + 1
+      }
+      # Start a new sequence
+      current_sequence <- positions[i]
+    }
+  }
+
+  # Check the last sequence
+  if (length(current_sequence) == 2) {
+    consecutive_sequences[[result_index]] <- paste(text_vector[current_sequence], collapse = " ")
+    starting_indices[[result_index]] <- current_sequence[1]
+    consecutive_indices_excluding_start[[result_index]] <- current_sequence[-1]
+    concatenated_elements[[result_index]] <- text_vector[current_sequence]
+    result_index <- result_index + 1
+  }
+
+  # Remove unused list elements (those that are still NULL)
+  consecutive_sequences <- consecutive_sequences[!sapply(consecutive_sequences, is.null)]
+  starting_indices <- starting_indices[!sapply(starting_indices, is.null)]
+  consecutive_indices_excluding_start <- consecutive_indices_excluding_start[!sapply(consecutive_indices_excluding_start, is.null)]
+  concatenated_elements <- concatenated_elements[!sapply(concatenated_elements, is.null)]
+
+  return(list(
+    consecutive_sequences = unlist(consecutive_sequences)
+    , starting_indices = unlist(starting_indices)
+    , consecutive_indices_excluding_start = unlist(consecutive_indices_excluding_start)
+    , concatenated_elements = concatenated_elements
+  ))
 
 }
