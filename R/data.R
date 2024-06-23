@@ -13,9 +13,9 @@
 "freud_page"
 
 
-#' Sigmund Freud complete work by lines
+#' Sigmund Freud complete work by sentences
 #'
-#' @format # `freud_line`
+#' @format # `freud_sntnce`
 #' A data frame with 125,571 rows and 6 columns:
 #'
 #' \describe{
@@ -24,10 +24,10 @@
 #'   \item{writ_yr}{year of book / article writing}
 #'   \item{title}{title of book / article}
 #'   \item{pg_title}{page number in book / article}
-#'   \item{text}{raw text from each page}
+#'   \item{text}{raw text from each sentence}
 #' }
 #' @source <https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf>
-"freud_line"
+"freud_sntnce"
 
 #' #' Sigmund Freud complete work by words
 #'
