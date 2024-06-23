@@ -10,8 +10,8 @@ list(
   # tokenize by page and lines
   , tar_target(freud, create_sfreud_complete_work_tibble(path_pdf))
   , tar_target(freud_page, freud$by_page)
-  , tar_target(freud_line, freud$by_line)
+  , tar_target(freud_sntnce, freud$by_line)
   , tar_target(freud_word, freud$by_word)
   # use data for package
-  , tar_target(use_data_for_pkg, use_data(freud_page, freud_line, freud_word))
+  , tar_target(use_data_for_pkg, use_data(freud_page, freud_sntnce, freud_word))
 )
