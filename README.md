@@ -43,5 +43,5 @@ that takes as argument `path_pdf` the path of the pdf file.
 The main processing steps are:
 
 - import in R of the text and table of content contained in the PDF
-- tokenization of the text in lines/words
+- tokenization of the text in sentence/words
 - detection of the book/article titles and subtitles
