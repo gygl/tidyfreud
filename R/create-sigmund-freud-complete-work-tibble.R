@@ -3,7 +3,7 @@
 #'
 #' @param path_pdf string, path to pdf
 #'
-#' @return list, contains 2 dataframe with text by page and text by line
+#' @return list, contains 3 dataframes with text by page, by line and by words
 #' @export
 #'
 create_sfreud_complete_work_tibble = function(path_pdf) {
@@ -200,23 +200,27 @@ create_sfreud_complete_work_tibble = function(path_pdf) {
   text_by_sntnce = text_by_line %>%
     group_by(pg_all, publi_yr, writ_yr, title, subtitle, signature, date_letters) %>%
     summarize(text = paste(text, collapse = " ")) %>%
-    mutate(text = map(text, ~(str_split(.x, "(?<=[\\.])")))) %>%
-    unnest(text) %>% unnest(text) %>%
-    mutate(text = trimws(text)) %>%
-    filter(nchar(text) != 0) %>%
+    mutate(sentence = map(text, ~(str_split(.x, "(?<=[\\.])")))) %>%
+    unnest(sentence) %>% unnest(sentence) %>%
+    mutate(sentence = trimws(sentence)) %>%
+    filter(nchar(sentence) != 0) %>%
     group_by(pg_all) %>% mutate(sntce_nb = 1:n()) %>%
     ungroup() %>%
     mutate(pg_title = pg_all - min(pg_all) + 1) %>%
-    select(pg_all, publi_yr, writ_yr, title, pg_title, sntce_nb, subtitle, text, signature, date_letters)
+    select(pg_all, publi_yr, writ_yr, title, pg_title, sntce_nb, subtitle, sentence, signature, date_letters)
 
 
   # by word
-  text_by_word = text_by_line %>%
+  text_by_word = text_by_sntnce %>%
     # tokenize to words
-    unnest_tokens(word, text) %>%
-    anti_join(stop_words) %>%
+    unnest_tokens(word, sentence) %>%
+    left_join(
+      stop_words %>% select(-lexicon) %>%
+        mutate(is_stop_word = TRUE) %>%
+        distinct) %>%
     # remove digits only
-    filter(str_detect(word, "^\\d+$", negate=TRUE))
+    filter(str_detect(word, "^\\d+$", negate=TRUE)) %>%
+    mutate(is_stop_word = ifelse(is.na(is_stop_word), FALSE, is_stop_word))
 
   # setdiff(text_by_line$title %>% unique, titles_tbl$titles)
   # setdiff(titles_tbl$titles, text_by_line$title %>% unique)

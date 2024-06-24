@@ -3,17 +3,16 @@
 \docType{data}
 \name{freud_page}
 \alias{freud_page}
-\title{Sigmund Freud data}
+\title{Tibble with Sigmund Freud's complete work by page}
 \format{
-# `freud_page`
-A data frame with 5,102 rows and 2 columns:
+`freud_page` a data frame with 5,102 rows and 2 columns:
 \describe{
-  \item{pg_all}{page of original PDF file}
-  \item{text}{raw text from each page}
+  \item{pg_all}{integer, page of original PDF file}
+  \item{text}{character, raw text from each page}
   }
 }
 \source{
-<https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf>
+\href{https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf}{Text source}
 }
 \usage{
 freud_page
