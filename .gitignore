@@ -5,5 +5,7 @@
 *.Rproj
 _targets/
 data/Freud_Complete_Works.pdf
-dev-task.R
+dev*
+text/
 display_page.txt
+display_text.txt

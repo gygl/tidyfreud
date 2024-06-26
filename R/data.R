@@ -15,7 +15,7 @@
 
 #' Tibble with Sigmund Freud's complete work by sentences
 #'
-#' @format `freud_sntnce` a data frame with 125,571 rows and 6 columns:
+#' @format `freud_sent` a data frame with 125,571 rows and 6 columns:
 #'
 #' \describe{
 #'   \item{pg_all}{integer, page number in original PDF file}
@@ -26,7 +26,7 @@
 #'   \item{sentence}{character, raw text from each sentence}
 #' }
 #' @source \href{https://www.valas.fr/IMG/pdf/Freud_Complete_Works.pdf}{Text source}
-"freud_sntnce"
+"freud_sent"
 
 #' Tibble with Sigmund Freud's complete work by words
 #'

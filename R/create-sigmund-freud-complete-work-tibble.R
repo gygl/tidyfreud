@@ -277,13 +277,13 @@ display_a_page = function(text_by_page, page) {
 #' @return nothing
 #' @export
 #'
-use_data = function(freud_page, freud_sntnce, freud_word) {
+use_data = function(freud_page, freud_sent, freud_word) {
 
   dfile = list.files(path = "./data/", pattern = "^freud_.*.rda$", full.names = TRUE)
   if (length(dfile) > 0) map(dfile, file.remove)
 
   usethis::use_data(freud_page)
-  usethis::use_data(freud_sntnce)
+  usethis::use_data(freud_sent)
   usethis::use_data(freud_word)
 
 
